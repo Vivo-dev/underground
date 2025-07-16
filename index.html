@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Underground Fund</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 40px;
+        }
+
+        .nav-links a {
+            color: #cccccc;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #ffffff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: normal;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .hero-tagline {
+            font-size: 18px;
+            color: #999999;
+            margin-bottom: 40px;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .section {
+            padding: 100px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section h2 {
+            font-size: 36px;
+            margin-bottom: 60px;
+            text-align: center;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: normal;
+        }
+
+        .manifesto {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .manifesto-text {
+            font-size: 20px;
+            line-height: 1.8;
+            color: #cccccc;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .focus-areas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 60px;
+            margin-top: 80px;
+        }
+
+        .focus-item {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .focus-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .focus-item h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .focus-item p {
+            color: #999999;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .rules {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .rule-item {
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .rule-item:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateX(10px);
+        }
+
+        .rule-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 15px;
+        }
+
+        .rule-text {
+            color: #cccccc;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .contact {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .contact-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact p {
+            font-size: 18px;
+            color: #999999;
+            margin-bottom: 40px;
+        }
+
+        .contact-info {
+            font-size: 16px;
+            color: #cccccc;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            color: #666666;
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .glitch::before {
+            animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
+            color: #ff0000;
+            z-index: -1;
+        }
+
+        .glitch::after {
+            animation: glitch-anim-2 0.3s infinite linear alternate-reverse;
+            color: #00ff00;
+            z-index: -2;
+        }
+
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 30px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 41px, 0); }
+            95% { clip: rect(60px, 9999px, 52px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 33px, 0); }
+            75% { clip: rect(68px, 9999px, 18px, 0); }
+            80% { clip: rect(19px, 9999px, 93px, 0); }
+            85% { clip: rect(1px, 9999px, 83px, 0); }
+            90% { clip: rect(44px, 9999px, 59px, 0); }
+            95% { clip: rect(11px, 9999px, 52px, 0); }
+            100% { clip: rect(86px, 9999px, 73px, 0); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .contact-form {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .contact-form.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-container {
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .form-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-close:hover {
+            color: #cccccc;
+        }
+
+        .form-title {
+            font-size: 24px;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #cccccc;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffffff;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .form-submit:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+            .hero h1 {
+                font-size: 36px;
+                letter-spacing: 2px;
+            }
+            
+            .hero-tagline {
+                font-size: 16px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .focus-areas {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .rules-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+            
+            .section h2 {
+                font-size: 28px;
+                margin-bottom: 40px;
+            }
+            
+            .manifesto-text {
+                font-size: 18px;
+            }
+            
+            .focus-item {
+                padding: 30px 15px;
+            }
+            
+            .rule-item {
+                padding: 20px;
+            }
+            
+            .cta-button {
+                padding: 12px 30px;
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 28px;
+                letter-spacing: 1px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .manifesto-text {
+                font-size: 16px;
+            }
+            
+            .focus-item h3 {
+                font-size: 20px;
+            }
+            
+            .rule-number {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    
+    <header>
+        <nav class="container">
+            <a href="#" class="logo">The Underground Fund</a>
+            <ul class="nav-links">
+                <li><a href="#manifesto">Manifesto</a></li>
+                <li><a href="#focus">Focus</a></li>
+                <li><a href="#rules">Rules</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="glitch" data-text="THE UNDERGROUND FUND">THE UNDERGROUND FUND</h1>
+                <p class="hero-tagline">Deep Tech • Hardware • Defense</p>
+                <a href="#" class="cta-button" id="fund-button">Fund the Underground</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="manifesto">
+        <div class="container">
+            <h2>The Manifesto</h2>
+            <div class="manifesto">
+                <p class="manifesto-text">
+                    "We are a generation of men raised by machines. We're the middle children of history, man. No purpose or place. We have no Great War. No Great Depression. Our great war is a spiritual war. Our great depression is our lives."
+                </p>
+                <p class="manifesto-text">
+                    But we found our war. In the circuits. In the steel. In the code that will reshape reality itself. We are the underground of deep tech, funding the rebels who build the future in garages and labs, away from the noise of the market.
+                </p>
+                <p class="manifesto-text">
+                    We don't invest in unicorns. We create dragons.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="focus">
+        <div class="container">
+            <h2>Our Focus</h2>
+            <div class="focus-areas">
+                <div class="focus-item">
+                    <h3>Deep Tech</h3>
+                    <p>Quantum computing, AI hardware, biotech, and technologies that push the boundaries of what's possible. We fund the impossible.</p>
+                </div>
+                <div class="focus-item">
+                    <h3>Hardware</h3>
+                    <p>Semiconductors, robotics, advanced materials, and physical systems that interact with the real world. Code is temporary. Hardware is forever.</p>
+                </div>
+                <div class="focus-item">
+                    <h3>Defense</h3>
+                    <p>Cybersecurity, autonomous systems, advanced communications, and technologies that protect and serve. The future needs guardians.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section rules" id="rules">
+        <div class="container">
+            <h2>The Rules</h2>
+            <div class="rules-grid">
+                <div class="rule-item">
+                    <div class="rule-number">01</div>
+                    <div class="rule-text">You do not talk about your failures. You learn from them.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">02</div>
+                    <div class="rule-text">You DO NOT talk about your failures. You iterate beyond them.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">03</div>
+                    <div class="rule-text">If someone says stop, goes limp, or taps out, the funding round is over.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">04</div>
+                    <div class="rule-text">Only two companies per portfolio vertical.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">05</div>
+                    <div class="rule-text">One technology breakthrough at a time.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">06</div>
+                    <div class="rule-text">No slides, no buzzwords. Just working prototypes.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">07</div>
+                    <div class="rule-text">Funding will go on as long as it has to.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-number">08</div>
+                    <div class="rule-text">If this is your first night at The Underground Fund, you have to build.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section contact" id="contact">
+        <div class="container">
+            <h2>Access Granted</h2>
+            <div class="contact-content">
+                <p>The first rule of The Underground Fund is: you don't talk about The Underground Fund. The second rule is: you build something worth talking about.</p>
+                <div class="contact-info">
+                    <p>For qualified deep tech ventures only.</p>
+                    <p>Submit your prototype, not your pitch deck.</p>
+                    <p>Contact: underground@theundergroundfund.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="contact-form" id="contact-form">
+        <div class="form-container">
+            <button class="form-close" id="close-form">&times;</button>
+            <h3 class="form-title">Fund the Underground</h3>
+            <form id="contribution-form" name="fund-contributions" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+                <input type="hidden" name="form-name" value="fund-contributions">
+                <!-- Hidden honeypot field for spam protection -->
+                <div style="display: none;">
+                    <input name="bot-field">
+                </div>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="help">How would you like to help?</label>
+                    <select id="help" name="help" required>
+                        <option value="">Select an option</option>
+                        <option value="angel-investor">Angel Investor</option>
+                        <option value="institutional-investor">Institutional Investor</option>
+                        <option value="limited-partner">Limited Partner</option>
+                        <option value="strategic-partner">Strategic Partner</option>
+                        <option value="advisor">Advisor/Mentor</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" name="country" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <button type="submit" class="form-submit">Submit Contribution</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 The Underground Fund. His name was Robert Paulson. Our name is Legion.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Form functionality
+        const fundButton = document.getElementById('fund-button');
+        const contactForm = document.getElementById('contact-form');
+        const closeForm = document.getElementById('close-form');
+        const contributionForm = document.getElementById('contribution-form');
+
+        fundButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            contactForm.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeForm.addEventListener('click', function() {
+            contactForm.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+
+        // Close form when clicking outside
+        contactForm.addEventListener('click', function(e) {
+            if (e.target === contactForm) {
+                contactForm.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Form submission with Netlify Forms
+        contributionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(contributionForm);
+            
+            // Submit to Netlify
+            fetch('/', {
+                method: 'POST',
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(formData).toString()
+            })
+            .then(() => {
+                // Success message
+                alert('Thank you for your interest in funding the underground. We will contact you soon.');
+                
+                // Close form and reset
+                contactForm.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                contributionForm.reset();
+            })
+            .catch((error) => {
+                alert('There was an error submitting your information. Please try again.');
+                console.error('Error:', error);
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Glitch effect trigger on scroll
+        window.addEventListener('scroll', () => {
+            const glitchElement = document.querySelector('.glitch');
+            const scrollPosition = window.scrollY;
+            
+            if (scrollPosition > 100) {
+                glitchElement.style.animation = 'none';
+            } else {
+                glitchElement.style.animation = '';
+            }
+        });
+
+        // Subtle parallax effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.hero');
+            const speed = scrolled * 0.5;
+            
+            parallax.style.transform = `translateY(${speed}px)`;
+        });
+
+        // Random glitch activation
+        setInterval(() => {
+            const glitchElement = document.querySelector('.glitch');
+            glitchElement.style.animation = 'none';
+            setTimeout(() => {
+                glitchElement.style.animation = '';
+            }, 100);
+        }, 15000);
+    </script>
+</body>
+</html>
