@@ -1,835 +1,1020 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Underground Fund</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Underground Fund</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            color: #e0e0e0;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
+    :root {
+      --black: #050505;
+      --off-white: #f4f4f4;
+      --cream: #e8e3d8;
+      --red: #d93829;
+      --red-dim: #9a2018;
+      --gold: #d4b254;
+      --gold-dim: #7a6228;
+      --mono: 'DM Mono', monospace;
+      --display: 'Bebas Neue', sans-serif;
+      --serif: 'Playfair Display', serif;
+    }
 
-        .noise-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 1;
-        }
+    body {
+      background-color: var(--black);
+      color: var(--off-white);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: hidden;
+      cursor: none; 
+    }
 
-        .container {
-            position: relative;
-            z-index: 2;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+    /* CURSOR */
+    .cursor-dot,
+    .cursor-outline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 9999;
+      pointer-events: none;
+    }
 
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 100;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .cursor-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--gold);
+    }
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .cursor-outline {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(212, 178, 84, 0.4);
+      transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
+    }
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ffffff;
-            text-decoration: none;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+    .cursor-hover .cursor-outline {
+      width: 80px;
+      height: 80px;
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(2px);
+      border-color: rgba(212, 178, 84, 0.15);
+    }
 
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 40px;
-        }
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.25;
+    }
 
-        .nav-links a {
-            color: #cccccc;
-            text-decoration: none;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
+    /* BG GLOW */
+    .bg-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(217, 56, 41, 0.08) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+    }
 
-        .nav-links a:hover {
-            color: #ffffff;
-        }
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      background: rgba(5, 5, 5, 0.6);
+      backdrop-filter: blur(20px);
+      transition: padding 0.4s ease;
+    }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: #ffffff;
-            transition: width 0.3s ease;
-        }
+    nav.scrolled { padding: 1.2rem 5rem; }
 
-        .nav-links a:hover::after {
-            width: 100%;
-        }
+    .nav-logo {
+      font-family: var(--display);
+      font-size: 1.6rem;
+      letter-spacing: 0.15em;
+      color: var(--off-white);
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.3s;
+    }
 
-        .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
+    .nav-logo span { color: var(--red); }
 
-        .hero-content {
-            max-width: 800px;
-            animation: fadeInUp 1s ease-out;
-        }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 3.5rem;
+    }
 
-        .hero h1 {
-            font-size: 64px;
-            font-weight: normal;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: #ffffff;
-            line-height: 1.2;
-        }
+    nav ul a {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      display: inline-block;
+      transition: color 0.3s, transform 0.3s;
+    }
 
-        .hero-tagline {
-            font-size: 18px;
-            color: #999999;
-            margin-bottom: 40px;
-            font-weight: normal;
-            letter-spacing: 1px;
-        }
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 5rem;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
 
-        .cta-button {
-            display: inline-block;
-            padding: 15px 40px;
-            background: transparent;
-            border: 2px solid #ffffff;
-            color: #ffffff;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    .hero-bg-text {
+      position: absolute;
+      top: 55%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--display);
+      font-size: clamp(15rem, 28vw, 26rem);
+      color: rgba(255, 255, 255, 0.02);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: 0.02em;
+      filter: blur(4px);
+    }
 
-        .cta-button:hover {
-            background: #ffffff;
-            color: #000000;
-        }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      align-self: flex-start;
+      margin-top: 10vh;
+    }
 
-        .section {
-            padding: 100px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
 
-        .section h2 {
-            font-size: 36px;
-            margin-bottom: 60px;
-            text-align: center;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: normal;
-        }
+    .hero-tag::before {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 1px;
+      background-color: var(--red);
+    }
 
-        .manifesto {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
+    .hero-title {
+      font-family: var(--display);
+      font-size: clamp(4.5rem, 11vw, 10rem);
+      line-height: 0.85;
+      letter-spacing: 0.02em;
+      color: var(--off-white);
+      max-width: 1000px;
+      text-transform: uppercase;
+    }
 
-        .manifesto-text {
-            font-size: 20px;
-            line-height: 1.8;
-            color: #cccccc;
-            margin-bottom: 40px;
-            font-style: italic;
-        }
+    .hero-title .line { overflow: hidden; display: block; }
+    .hero-title .word {
+      display: inline-block;
+      transform: translateY(110%);
+      transition: transform 0.8s cubic-bezier(0.25, 1, 0.2, 1);
+    }
+    .hero-title.loaded .word { transform: translateY(0); }
 
-        .focus-areas {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 60px;
-            margin-top: 80px;
-        }
+    .hero-title em {
+      font-style: normal;
+      color: transparent;
+      -webkit-text-stroke: 1.5px var(--gold);
+    }
 
-        .focus-item {
-            text-align: center;
-            padding: 40px 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
+    .hero-sub {
+      margin-top: 2.5rem;
+      max-width: 600px;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      line-height: 1.9;
+      color: rgba(255, 255, 255, 0.8999999999999999);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: opacity 1s ease 0.6s, transform 1s ease 0.6s;
+    }
+    .loaded .hero-sub { opacity: 1; transform: translateY(0); }
 
-        .focus-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-5px);
-        }
+    .hero-cta {
+      margin-top: 3.5rem;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: opacity 1s ease 0.8s, transform 1s ease 0.8s;
+    }
+    .loaded .hero-cta { opacity: 1; transform: translateY(0); }
 
-        .focus-item h3 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #ffffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    /* BUTTONS */
+    .btn-primary, .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 2.5rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: none;
+      transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
 
-        .focus-item p {
-            color: #999999;
-            font-size: 16px;
-            line-height: 1.6;
-        }
+    .btn-primary {
+      background: var(--red);
+      color: var(--off-white);
+      border: 1px solid var(--red);
+    }
 
-        .rules {
-            background: rgba(255, 255, 255, 0.02);
-        }
+    .btn-primary:hover { 
+      background: transparent;
+      box-shadow: 0 0 20px rgba(217, 56, 41, 0.4);
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      width: 100%; height: 100%;
+      background: var(--off-white);
+      left: 0; top: 100%;
+      transition: top 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: -1;
+    }
+    .btn-primary:hover::after { top: 0; }
+    .btn-primary:hover { color: var(--black); }
 
-        .rules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-top: 60px;
-        }
+    .btn-ghost {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.8999999999999999);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .rule-item {
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 3px solid #ffffff;
-            transition: all 0.3s ease;
-        }
+    .btn-ghost:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212, 178, 84, 0.05);
+    }
 
-        .rule-item:hover {
-            background: rgba(0, 0, 0, 0.5);
-            transform: translateX(10px);
-        }
+    /* HERO STATS */
+    .hero-stats {
+      position: absolute;
+      right: 5rem;
+      bottom: 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 1s ease 1s, transform 1s ease 1s;
+    }
+    .loaded .hero-stats { opacity: 1; transform: translateX(0); }
 
-        .rule-number {
-            font-size: 48px;
-            font-weight: bold;
-            color: #333333;
-            margin-bottom: 15px;
-        }
+    .stat {
+      text-align: right;
+      position: relative;
+      padding-right: 1.5rem;
+    }
+    .stat::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--red) 0%, transparent 100%);
+    }
 
-        .rule-text {
-            color: #cccccc;
-            font-size: 16px;
-            line-height: 1.5;
-        }
+    .stat-num {
+      font-family: var(--display);
+      font-size: 3rem;
+      color: var(--off-white);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
 
-        .contact {
-            text-align: center;
-            background: rgba(0, 0, 0, 0.5);
-        }
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+    }
 
-        .contact-content {
-            max-width: 600px;
-            margin: 0 auto;
-        }
+    /* DIVIDER */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 0 5rem;
+      margin: 4rem 0;
+      opacity: 0;
+      transform: scaleX(0.9);
+      transition: opacity 1s, transform 1s;
+    }
+    .divider.visible { opacity: 1; transform: scaleX(1); }
 
-        .contact p {
-            font-size: 18px;
-            color: #999999;
-            margin-bottom: 40px;
-        }
+    .divider-line { flex: 1; height: 1px; background: rgba(255, 255, 255, 0.05); }
+    .divider-text {
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+    }
 
-        .contact-info {
-            font-size: 16px;
-            color: #cccccc;
-            margin-bottom: 20px;
-        }
+    /* SECTIONS */
+    section {
+      padding: 10rem 5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
 
-        footer {
-            padding: 40px 0;
-            text-align: center;
-            color: #666666;
-            font-size: 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1.5rem;
+      display: inline-block;
+    }
 
-        .glitch {
-            position: relative;
-            display: inline-block;
-        }
+    .section-title {
+      font-family: var(--display);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      line-height: 0.9;
+      letter-spacing: 0.02em;
+      color: var(--off-white);
+      margin-bottom: 4rem;
+      text-transform: uppercase;
+    }
 
-        .glitch::before,
-        .glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-        }
+    /* THESIS GRID */
+    .thesis-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
 
-        .glitch::before {
-            animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
-            color: #ff0000;
-            z-index: -1;
-        }
+    .thesis-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 3.5rem;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.4s ease, border-color 0.4s ease;
+    }
+    .thesis-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 40%);
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .thesis-card:hover::after { opacity: 1; }
+    .thesis-card:hover {  border-color: rgba(255, 255, 255, 0.15); transform: translateY(-5px); }
 
-        .glitch::after {
-            animation: glitch-anim-2 0.3s infinite linear alternate-reverse;
-            color: #00ff00;
-            z-index: -2;
-        }
+    .thesis-card * { position: relative; z-index: 1; }
+    .thesis-card::before {
+      content: attr(data-num);
+      position: absolute;
+      top: 1.5rem; right: 2rem;
+      font-family: var(--display);
+      font-size: 6rem;
+      color: rgba(255, 255, 255, 0.03);
+      line-height: 1;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-        @keyframes glitch-anim-1 {
-            0% { clip: rect(42px, 9999px, 44px, 0); }
-            5% { clip: rect(12px, 9999px, 59px, 0); }
-            10% { clip: rect(48px, 9999px, 29px, 0); }
-            15% { clip: rect(42px, 9999px, 73px, 0); }
-            20% { clip: rect(63px, 9999px, 27px, 0); }
-            25% { clip: rect(34px, 9999px, 55px, 0); }
-            30% { clip: rect(86px, 9999px, 73px, 0); }
-            35% { clip: rect(20px, 9999px, 20px, 0); }
-            40% { clip: rect(26px, 9999px, 60px, 0); }
-            45% { clip: rect(25px, 9999px, 66px, 0); }
-            50% { clip: rect(57px, 9999px, 98px, 0); }
-            55% { clip: rect(5px, 9999px, 46px, 0); }
-            60% { clip: rect(82px, 9999px, 31px, 0); }
-            65% { clip: rect(54px, 9999px, 27px, 0); }
-            70% { clip: rect(28px, 9999px, 99px, 0); }
-            75% { clip: rect(45px, 9999px, 69px, 0); }
-            80% { clip: rect(23px, 9999px, 30px, 0); }
-            85% { clip: rect(54px, 9999px, 84px, 0); }
-            90% { clip: rect(45px, 9999px, 41px, 0); }
-            95% { clip: rect(60px, 9999px, 52px, 0); }
-            100% { clip: rect(4px, 9999px, 91px, 0); }
-        }
+    .thesis-icon {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 2rem;
+    }
 
-        @keyframes glitch-anim-2 {
-            0% { clip: rect(65px, 9999px, 100px, 0); }
-            5% { clip: rect(52px, 9999px, 74px, 0); }
-            10% { clip: rect(79px, 9999px, 85px, 0); }
-            15% { clip: rect(75px, 9999px, 5px, 0); }
-            20% { clip: rect(67px, 9999px, 61px, 0); }
-            25% { clip: rect(14px, 9999px, 79px, 0); }
-            30% { clip: rect(1px, 9999px, 66px, 0); }
-            35% { clip: rect(86px, 9999px, 30px, 0); }
-            40% { clip: rect(23px, 9999px, 98px, 0); }
-            45% { clip: rect(85px, 9999px, 72px, 0); }
-            50% { clip: rect(71px, 9999px, 75px, 0); }
-            55% { clip: rect(2px, 9999px, 48px, 0); }
-            60% { clip: rect(30px, 9999px, 16px, 0); }
-            65% { clip: rect(59px, 9999px, 50px, 0); }
-            70% { clip: rect(41px, 9999px, 33px, 0); }
-            75% { clip: rect(68px, 9999px, 18px, 0); }
-            80% { clip: rect(19px, 9999px, 93px, 0); }
-            85% { clip: rect(1px, 9999px, 83px, 0); }
-            90% { clip: rect(44px, 9999px, 59px, 0); }
-            95% { clip: rect(11px, 9999px, 52px, 0); }
-            100% { clip: rect(86px, 9999px, 73px, 0); }
-        }
+    .thesis-card h3 {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--off-white);
+      margin-bottom: 1rem;
+    }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    .thesis-card p {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.9;
+    }
 
-        .contact-form {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
+    /* FOUNDER */
+    .founder-section {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 8rem;
+      align-items: start;
+    }
+    .founder-left { position: sticky; top: 12rem; }
 
-        .contact-form.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .founder-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: var(--gold);
+      padding: 0.4rem 1rem;
+      margin-bottom: 2rem;
+    }
 
-        .form-container {
-            background: rgba(26, 26, 26, 0.95);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 40px;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            animation: slideIn 0.3s ease-out;
-        }
+    .founder-name {
+      font-family: var(--display);
+      font-size: clamp(4rem, 6vw, 5rem);
+      line-height: 0.9;
+      color: var(--off-white);
+      margin-bottom: 1rem;
+    }
 
-        .form-close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: #ffffff;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .founder-title {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+    }
 
-        .form-close:hover {
-            color: #cccccc;
-        }
+    .founder-right p {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.8999999999999999);
+      line-height: 2;
+      margin-bottom: 2rem;
+    }
+    .founder-right p strong { color: var(--off-white); font-weight: 400; box-shadow: inset 0 -1px 0 rgba(212, 178, 84, 0.4); }
 
-        .form-title {
-            font-size: 24px;
-            color: #ffffff;
-            text-align: center;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+    .achievements {
+      margin-top: 3rem;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    .achievement {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 1.8rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.01);
+      transition: background 0.3s;
+    }
+    .achievement:last-child { border-bottom: none; }
+    .achievement:hover { background: rgba(212, 178, 84, 0.03); }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    .ach-marker {
+      width: 8px; height: 8px;
+      background: var(--red);
+      flex-shrink: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(217, 56, 41, 0.5);
+    }
 
-        .form-group label {
-            display: block;
-            color: #cccccc;
-            margin-bottom: 8px;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+    .ach-text { font-size: 0.85rem; color: rgba(255, 255, 255, 1); line-height: 1.6; }
+    .ach-text strong { color: var(--off-white); font-weight: 400; letter-spacing: 0.05em; }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
+    /* MANIFESTO */
+    .manifesto-block {
+      border-left: 2px solid var(--red);
+      padding-left: 4rem;
+      margin: 5rem 0;
+      position: relative;
+    }
+    .manifesto-block::before {
+      content: '"';
+      position: absolute;
+      left: -1rem;
+      top: -2rem;
+      font-family: var(--serif);
+      font-size: 8rem;
+      color: rgba(217, 56, 41, 0.1);
+      line-height: 1;
+    }
+    .manifesto-block blockquote {
+      font-family: var(--serif);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--off-white);
+      font-style: italic;
+    }
+    .manifesto-block cite {
+      display: block;
+      margin-top: 2rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.6);
+      font-style: normal;
+    }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #ffffff;
-        }
+    /* PRINCIPLES */
+    .principles-list {
+      display: flex;
+      flex-direction: column;
+      counter-reset: principle;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .principle {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 3rem;
+      padding: 4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      align-items: start;
+      transition: transform 0.4s ease;
+    }
+    .principle:hover .principle-num { color: var(--red); transform: translateX(10px); }
+    .principle-num {
+      font-family: var(--display);
+      font-size: 4rem;
+      color: rgba(255, 255, 255, 0.1);
+      line-height: 0.8;
+      transition: color 0.3s, transform 0.3s;
+    }
+    .principle-body h4 {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .principle-body p {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.9;
+      max-width: 800px;
+    }
 
-        .form-group textarea {
-            height: 80px;
-            resize: vertical;
-        }
+    /* CONTACT */
+    .contact-section {
+      text-align: center;
+      padding: 12rem 5rem;
+      position: relative;
+    }
+    .contact-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(217, 56, 41, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .contact-section .section-title { font-size: clamp(4rem, 9vw, 8rem); margin-bottom: 2rem; }
+    .contact-section p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      margin-bottom: 4rem;
+      letter-spacing: 0.05em;
+      line-height: 1.8;
+    }
+    .contact-email {
+      display: inline-block;
+      font-family: var(--display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      letter-spacing: 0.05em;
+      color: var(--off-white);
+      text-decoration: none;
+      position: relative;
+    }
+    .contact-email::after {
+      content: '';
+      position: absolute;
+      width: 100%; height: 2px;
+      bottom: -4px; left: 0;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .contact-email:hover::after { transform: scaleX(1); transform-origin: left; }
 
-        .form-submit {
-            width: 100%;
-            padding: 15px;
-            background: transparent;
-            border: 2px solid #ffffff;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-        }
+    /* FOOTER */
+    footer {
+      padding: 3rem 5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--black);
+      position: relative;
+      z-index: 2;
+    }
+    footer p {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+    }
 
-        .form-submit:hover {
-            background: #ffffff;
-            color: #000000;
-        }
+    /* ANIMATIONS */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s cubic-bezier(0.25, 1, 0.2, 1), transform 1s cubic-bezier(0.25, 1, 0.2, 1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .stagger-1 { transition-delay: 0.1s; }
+    .stagger-2 { transition-delay: 0.2s; }
+    .stagger-3 { transition-delay: 0.3s; }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-            .hero h1 {
-                font-size: 36px;
-                letter-spacing: 2px;
-            }
-            
-            .hero-tagline {
-                font-size: 16px;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .focus-areas {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-            
-            .rules-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .section {
-                padding: 60px 0;
-            }
-            
-            .section h2 {
-                font-size: 28px;
-                margin-bottom: 40px;
-            }
-            
-            .manifesto-text {
-                font-size: 18px;
-            }
-            
-            .focus-item {
-                padding: 30px 15px;
-            }
-            
-            .rule-item {
-                padding: 20px;
-            }
-            
-            .cta-button {
-                padding: 12px 30px;
-                font-size: 12px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 28px;
-                letter-spacing: 1px;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-            
-            .manifesto-text {
-                font-size: 16px;
-            }
-            
-            .focus-item h3 {
-                font-size: 20px;
-            }
-            
-            .rule-number {
-                font-size: 36px;
-            }
-        }
-    </style>
+    /* TICKER */
+    .ticker {
+      overflow: hidden;
+      background: var(--red);
+      padding: 1.2rem 0;
+      white-space: nowrap;
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .ticker-inner {
+      display: inline-flex;
+      gap: 6rem;
+      animation: ticker 30s linear infinite;
+    }
+    .ticker span {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 1);
+      display: flex;
+      align-items: center;
+    }
+    .ticker span.dot::before {
+      content: '';
+      display: block;
+      width: 4px; height: 4px;
+      background: var(--off-white);
+      margin-right: 6rem;
+      opacity: 0.5;
+    }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+    @media (max-width: 1024px) {
+      .thesis-grid { grid-template-columns: 1fr; }
+      .founder-section { grid-template-columns: 1fr; gap: 4rem; }
+      .founder-left { position: static; }
+    }
+
+    @media (max-width: 768px) {
+      body { cursor: auto; }
+      .cursor-dot, .cursor-outline, .bg-glow { display: none; }
+      nav { padding: 1.5rem 2rem; }
+      nav.scrolled { padding: 1rem 2rem; }
+      nav ul { display: none; }
+      .hero { padding: 0 2rem; }
+      .hero-stats { display: none; }
+      section { padding: 6rem 2rem; }
+      .divider { padding: 0 2rem; margin: 2rem 0;}
+      footer { padding: 2rem; flex-direction: column; gap: 1rem; text-align: center; }
+      .contact-section { padding: 8rem 2rem; }
+      .manifesto-block { padding-left: 2rem; }
+      .principle { grid-template-columns: 1fr; gap: 1rem; padding: 3rem 0; }
+      .principle-num { font-size: 3rem; }
+      .thesis-card { padding: 2rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="noise-overlay"></div>
-    
-    <header>
-        <nav class="container">
-            <a href="#" class="logo">The Underground Fund</a>
-            <ul class="nav-links">
-                <li><a href="#manifesto">Manifesto</a></li>
-                <li><a href="#focus">Focus</a></li>
-                <li><a href="#rules">Rules</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
 
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="glitch" data-text="THE UNDERGROUND FUND">THE UNDERGROUND FUND</h1>
-                <p class="hero-tagline">Deep Tech • Hardware • Defense</p>
-                <a href="#" class="cta-button" id="fund-button">Fund the Underground</a>
-            </div>
-        </div>
-    </section>
+  <!-- CUSTOM CURSOR -->
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-outline" id="cursor-outline"></div>
+  <div class="bg-glow" id="bg-glow"></div>
 
-    <section class="section" id="manifesto">
-        <div class="container">
-            <h2>The Manifesto</h2>
-            <div class="manifesto">
-                <p class="manifesto-text">
-                    "We are a generation of men raised by machines. We're the middle children of history, man. No purpose or place. We have no Great War. No Great Depression. Our great war is a spiritual war. Our great depression is our lives."
-                </p>
-                <p class="manifesto-text">
-                    But we found our war. In the circuits. In the steel. In the code that will reshape reality itself. We are the underground of deep tech, funding the rebels who build the future in garages and labs, away from the noise of the market.
-                </p>
-                <p class="manifesto-text">
-                    We don't invest in unicorns. We create dragons.
-                </p>
-            </div>
-        </div>
-    </section>
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo mag-btn">THE <span>UNDERGROUND</span> FUND</a>
+    <ul>
+      <li><a href="#thesis" class="mag-btn">Thesis</a></li>
+      <li><a href="#founder" class="mag-btn">Founder</a></li>
+      <li><a href="#principles" class="mag-btn">Principles</a></li>
+      <li><a href="#contact" class="mag-btn">Contact</a></li>
+    </ul>
+  </nav>
 
-    <section class="section" id="focus">
-        <div class="container">
-            <h2>Our Focus</h2>
-            <div class="focus-areas">
-                <div class="focus-item">
-                    <h3>Deep Tech</h3>
-                    <p>Quantum computing, AI hardware, biotech, and technologies that push the boundaries of what's possible. We fund the impossible.</p>
-                </div>
-                <div class="focus-item">
-                    <h3>Hardware</h3>
-                    <p>Semiconductors, robotics, advanced materials, and physical systems that interact with the real world. Code is temporary. Hardware is forever.</p>
-                </div>
-                <div class="focus-item">
-                    <h3>Defense</h3>
-                    <p>Cybersecurity, autonomous systems, advanced communications, and technologies that protect and serve. The future needs guardians.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section rules" id="rules">
-        <div class="container">
-            <h2>The Rules</h2>
-            <div class="rules-grid">
-                <div class="rule-item">
-                    <div class="rule-number">01</div>
-                    <div class="rule-text">You do not talk about your failures. You learn from them.</div>
-                </div>
-                <div class="rule-item">
-                    <div class="rule-number">02</div>
-                    <div class="rule-text">You DO NOT talk about your failures. You iterate beyond them.</div>
-                </div>
-                <div class="rule-item">
-                    <div class="rule-number">03</div>
-                    <div class="rule-text">If someone says stop, goes limp, or taps out, the funding round is over.</div>
-                </div>
-                <div class="rule-item">
-                    <div class="rule-number">04</div>
-                    <div class="rule-text">Only two companies per portfolio vertical.</div>
-                </div>
-                <div class="rule-item">
-                    <div class="rule-number">05</div>
-                    <div class="rule-text">One technology breakthrough at a time.</div>
-                </div>
-                <div class="rule-item">
-                    <div class="rule-number">06</div>
-                    <div class="rule-text">No slides, no buzzwords. Just working prototypes.</div>
-                </div>
-                <div class="rule-item">
-                    <div class="rule-number">07</div>
-                    <div class="rule-text">Funding will go on as long as it has to.</div>
-                </div>
-                <div class="rule-item">
-                    <div class="rule-number">08</div>
-                    <div class="rule-text">If this is your first night at The Underground Fund, you have to build.</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section contact" id="contact">
-        <div class="container">
-           <!-- <h2>Access Granted</h2>
-            <div class="contact-content">
-                <p>The first rule of The Underground Fund is: you don't talk about The Underground Fund. The second rule is: you build something worth talking about.</p>
-                <div class="contact-info">
-                    <p>For qualified deep tech ventures only.</p>
-                    <p>Submit your prototype, not your pitch deck.</p>
-                    <p>Contact: vsinghr21191@gmail.com</p>
-                </div>
-            </div> -->
-            <p>Contact: vsinghr21191@gmail.com</p>
-        </div>
-    </section>
-
-    <div class="contact-form" id="contact-form">
-        <div class="form-container">
-            <button class="form-close" id="close-form">&times;</button>
-            <h3 class="form-title">Fund the Underground</h3>
-            <form id="contribution-form" name="fund-contributions" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-                <input type="hidden" name="form-name" value="fund-contributions">
-                <!-- Hidden honeypot field for spam protection -->
-                <div style="display: none;">
-                    <input name="bot-field">
-                </div>
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="help">How would you like to help?</label>
-                    <select id="help" name="help" required>
-                        <option value="">Select an option</option>
-                        <option value="angel-investor">Angel Investor</option>
-                        <option value="institutional-investor">Institutional Investor</option>
-                        <option value="limited-partner">Limited Partner</option>
-                        <option value="strategic-partner">Strategic Partner</option>
-                        <option value="advisor">Advisor/Mentor</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="country">Country</label>
-                    <input type="text" id="country" name="country" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" required>
-                </div>
-                <button type="submit" class="form-submit">Submit Contribution</button>
-            </form>
-        </div>
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-text" id="hero-bg">DEEP TECH</div>
+    <div class="hero-content">
+      <div class="hero-tag">// Pre-Seed · Deep Tech · Hardware · Defense</div>
+      <h1 class="hero-title" id="hero-title">
+        <span class="line"><span class="word">We</span> <span class="word">Don't</span></span>
+        <span class="line"><span class="word">Fund</span> <em class="word">Unicorns.</em></span>
+        <span class="line"><span class="word">We</span> <span class="word">Build</span> <span class="word">Dragons.</span></span>
+      </h1>
+      <p class="hero-sub">
+        The Underground Fund backs technically obsessed founders building at the intersection of AI, hardware, and the physical world — before the rest of the market notices.
+      </p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn-primary mag-btn">Submit Your Prototype</a>
+        <a href="#thesis" class="btn-ghost mag-btn">Our Thesis →</a>
+      </div>
     </div>
+    
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Devices Shipped</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">112%</div>
+        <div class="stat-label">Annualized Return</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">Pre-Seed</div>
+        <div class="stat-label">Entry Stage</div>
+      </div>
+    </div>
+  </section>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2025 The Underground Fund. His name was Robert Paulson. Our name is Legion.</p>
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span>AI × Physical World</span><span class="dot">Deep Tech Hardware</span><span class="dot">Defense & National Security</span><span class="dot">Autonomous Systems</span><span class="dot">Advanced Manufacturing</span><span class="dot">Cybersecurity</span>
+      <span class="dot">AI × Physical World</span><span class="dot">Deep Tech Hardware</span><span class="dot">Defense & National Security</span><span class="dot">Autonomous Systems</span><span class="dot">Advanced Manufacturing</span><span class="dot">Cybersecurity</span>
+      <span class="dot">AI × Physical World</span><span class="dot">Deep Tech Hardware</span><span class="dot">Defense & National Security</span><span class="dot">Autonomous Systems</span><span class="dot">Advanced Manufacturing</span><span class="dot">Cybersecurity</span>
+    </div>
+  </div>
+
+  <!-- THESIS -->
+  <div id="thesis">
+    <section>
+      <div class="reveal">
+        <div class="section-label">// 01 — Investment Thesis</div>
+        <h2 class="section-title">WHERE WE PLACE OUR BETS</h2>
+      </div>
+
+      <div class="manifesto-block reveal stagger-1">
+        <blockquote>"The most important technologies of the next decade will not live in the cloud. They will live in the world."</blockquote>
+        <cite>— The Underground Fund Thesis, 2025</cite>
+      </div>
+
+      <div class="thesis-grid">
+        <div class="thesis-card reveal hover-glow mag-card" data-num="01">
+          <div class="thesis-icon">⬡ Deep Tech</div>
+          <h3>Technically Ambitious, Not Financially Engineered</h3>
+          <p>Quantum computing, AI hardware, biotech, and technologies that require real scientific breakthroughs. We back founders who are building what most say is impossible.</p>
         </div>
-    </footer>
+        <div class="thesis-card reveal stagger-1 hover-glow mag-card" data-num="02">
+          <div class="thesis-icon">⬡ Hardware</div>
+          <h3>Code is Temporary. Hardware is Forever.</h3>
+          <p>Semiconductors, robotics, advanced materials, and physical systems. The companies that matter most in 10 years will have atoms at their core, not just bits.</p>
+        </div>
+        <div class="thesis-card reveal stagger-2 hover-glow mag-card" data-num="03">
+          <div class="thesis-icon">⬡ Defense</div>
+          <h3>The Future Needs Guardians</h3>
+          <p>Cybersecurity, autonomous systems, advanced communications, and dual-use technologies. We invest in the infrastructure of national and economic security.</p>
+        </div>
+        <div class="thesis-card reveal stagger-3 hover-glow mag-card" data-num="04">
+          <div class="thesis-icon">⬡ AI × Physical</div>
+          <h3>Intelligence That Acts on the World</h3>
+          <p>Not another SaaS dashboard. We fund AI that moves, manufactures, detects, and decides — systems that touch physical reality and change it.</p>
+        </div>
+      </div>
+    </section>
+  </div>
 
-    <script>
-        // Form functionality
-        const fundButton = document.getElementById('fund-button');
-        const contactForm = document.getElementById('contact-form');
-        const closeForm = document.getElementById('close-form');
-        const contributionForm = document.getElementById('contribution-form');
+  <div class="divider reveal"><div class="divider-line"></div><div class="divider-text">Founder</div><div class="divider-line"></div></div>
 
-        fundButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            contactForm.classList.add('active');
-            document.body.style.overflow = 'hidden';
+  <!-- FOUNDER -->
+  <div id="founder">
+    <section>
+      <div class="founder-section">
+        <div class="founder-left reveal">
+          <div class="founder-badge">Managing Partner</div>
+          <div class="founder-name">YOUR<br>NAME</div>
+          <div class="founder-title">Founder · Builder · Investor</div>
+        </div>
+        <div class="founder-right">
+          <p class="reveal stagger-1">I didn't come from venture capital. I came from the bench — <strong>designing, coding, and shipping hardware</strong> before most people understood why it mattered. I founded a cybersecurity hardware company and sold over 500 devices independently, from first prototype to final sale.</p>
+          <p class="reveal stagger-1">Before that, I was managing my family's capital and <strong>compounding it at 112% annually</strong> — not because I got lucky, but because I was obsessive about understanding what others missed. That same obsession is how I evaluate founders today.</p>
+          <p class="reveal stagger-1">I started The Underground Fund because I believe the best deep tech companies are being overlooked by funds that have grown too large, too safe, and too far from the lab bench. <strong>I want to be the first call, not the third meeting.</strong></p>
+
+          <div class="achievements reveal stagger-2">
+            <div class="achievement"><div class="ach-marker"></div><div class="ach-text"><strong>ElevenLabs AI Hackathon Winner</strong> — Built and shipped under pressure, against the field</div></div>
+            <div class="achievement"><div class="ach-marker"></div><div class="ach-text"><strong>500+ cybersecurity hardware devices</strong> shipped — solo founder, from design to distribution</div></div>
+            <div class="achievement"><div class="ach-marker"></div><div class="ach-text"><strong>112% annualized return</strong> managing capital — systematic, thesis-driven, not speculative</div></div>
+            <div class="achievement"><div class="ach-marker"></div><div class="ach-text"><strong>BSc in CS & Electronics</strong> — hardware and software, end to end</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="divider reveal"><div class="divider-line"></div><div class="divider-text">Principles</div><div class="divider-line"></div></div>
+
+  <!-- PRINCIPLES -->
+  <div id="principles">
+    <section>
+      <div class="reveal">
+        <div class="section-label">// 03 — How We Work</div>
+        <h2 class="section-title">THE RULES OF THE UNDERGROUND</h2>
+      </div>
+
+      <div class="principles-list">
+        <div class="principle reveal">
+          <div class="principle-num">01</div>
+          <div class="principle-body">
+            <h4>No Slides. Only Prototypes.</h4>
+            <p>If you can't show us something that works, we're not the right partner yet. We invest in builders who build, not presenters who pitch.</p>
+          </div>
+        </div>
+        <div class="principle reveal">
+          <div class="principle-num">02</div>
+          <div class="principle-body">
+            <h4>Trust But Verify — Always</h4>
+            <p>We love ambitious founders. We also do our diligence. The best relationships are built on transparency, not narrative.</p>
+          </div>
+        </div>
+        <div class="principle reveal">
+          <div class="principle-num">03</div>
+          <div class="principle-body">
+            <h4>One Breakthrough at a Time</h4>
+            <p>Focused companies beat unfocused ones. We back founders who know exactly what they're solving, and why they're the ones to solve it.</p>
+          </div>
+        </div>
+        <div class="principle reveal">
+          <div class="principle-num">04</div>
+          <div class="principle-body">
+            <h4>We Partner for the Long Game</h4>
+            <p>Deep tech doesn't exit in 18 months. We're patient, hands-on, and here for the full journey — from lab to market to category leadership.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- CONTACT -->
+  <div id="contact">
+    <div class="contact-section reveal">
+      <div class="section-label">// 04 — Get In Touch</div>
+      <h2 class="section-title">READY TO BUILD<br>SOMETHING <span style="color: var(--red);">REAL?</span></h2>
+      <p>We only review working prototypes. No pitch decks. No cold intros required.<br>If you're building in deep tech, hardware, or defense — reach out directly.</p>
+      <a href="mailto:contact@theundergroundfund.com" class="contact-email">contact@theundergroundfund.com</a>
+      <br><br>
+      <a href="mailto:contact@theundergroundfund.com" class="btn-primary mag-btn" style="margin-top: 3rem;">Submit Your Prototype</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 The Underground Fund. All rights reserved.</p>
+    <p>Deep Tech · Hardware · Defense · Pre-Seed</p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      
+      // Hero Load Animation
+      setTimeout(() => {
+        document.getElementById('hero').classList.add('loaded');
+        document.getElementById('hero-title').classList.add('loaded');
+      }, 300);
+
+      const dot = document.getElementById('cursor-dot');
+      const outline = document.getElementById('cursor-outline');
+      const bgGlow = document.getElementById('bg-glow');
+      
+      let cursorX = window.innerWidth / 2;
+      let cursorY = window.innerHeight / 2;
+      let outlineX = cursorX;
+      let outlineY = cursorY;
+      
+      const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      
+      if (!isTouchDevice) {
+        window.addEventListener('mousemove', (e) => {
+          cursorX = e.clientX;
+          cursorY = e.clientY;
+          
+          dot.style.transform = `translate(${cursorX}px, ${cursorY}px)`;
+          bgGlow.style.left = `${cursorX}px`;
+          bgGlow.style.top = `${cursorY}px`;
         });
 
-        closeForm.addEventListener('click', function() {
-            contactForm.classList.remove('active');
-            document.body.style.overflow = 'auto';
+        const render = () => {
+          outlineX += (cursorX - outlineX) * 0.15;
+          outlineY += (cursorY - outlineY) * 0.15;
+          outline.style.transform = `translate(${outlineX}px, ${outlineY}px)`;
+          requestAnimationFrame(render);
+        };
+        requestAnimationFrame(render);
+
+        const interactables = document.querySelectorAll('a, button, .mag-card');
+        interactables.forEach(el => {
+          el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+          el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
         });
 
-        // Close form when clicking outside
-        contactForm.addEventListener('click', function(e) {
-            if (e.target === contactForm) {
-                contactForm.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
+        const magBtns = document.querySelectorAll('.mag-btn');
+        magBtns.forEach(btn => {
+          btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const h = rect.width / 2;
+            const v = rect.height / 2;
+            const x = e.clientX - rect.left - h;
+            const y = e.clientY - rect.top - v;
+            btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+          });
+          btn.addEventListener('mouseleave', () => {
+            btn.style.transform = `translate(0px, 0px)`;
+          });
         });
 
-        // Form submission with Netlify Forms
-        contributionForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = new FormData(contributionForm);
-            
-            // Submit to Netlify
-            fetch('/', {
-                method: 'POST',
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams(formData).toString()
-            })
-            .then(() => {
-                // Success message
-                alert('Thank you for your interest in funding the underground. We will contact you soon.');
-                
-                // Close form and reset
-                contactForm.classList.remove('active');
-                document.body.style.overflow = 'auto';
-                contributionForm.reset();
-            })
-            .catch((error) => {
-                alert('There was an error submitting your information. Please try again.');
-                console.error('Error:', error);
-            });
+        const cards = document.querySelectorAll('.hover-glow');
+        cards.forEach(card => {
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+          });
         });
 
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
+        const heroBg = document.getElementById('hero-bg');
+        window.addEventListener('mousemove', (e) => {
+          const x = (e.clientX - window.innerWidth / 2) * -0.05;
+          const y = (e.clientY - window.innerHeight / 2) * -0.05;
+          heroBg.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
         });
+      }
 
-        // Glitch effect trigger on scroll
-        window.addEventListener('scroll', () => {
-            const glitchElement = document.querySelector('.glitch');
-            const scrollPosition = window.scrollY;
-            
-            if (scrollPosition > 100) {
-                glitchElement.style.animation = 'none';
-            } else {
-                glitchElement.style.animation = '';
-            }
+      const reveals = document.querySelectorAll('.reveal');
+      const navbar = document.getElementById('navbar');
+      
+      const scrollHandler = () => {
+        if (window.scrollY > 50) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+
+        const windowHeight = window.innerHeight;
+        reveals.forEach(reveal => {
+          const elementTop = reveal.getBoundingClientRect().top;
+          if (elementTop < windowHeight - 100) reveal.classList.add('visible');
         });
+      };
 
-        // Subtle parallax effect
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const parallax = document.querySelector('.hero');
-            const speed = scrolled * 0.5;
-            
-            parallax.style.transform = `translateY(${speed}px)`;
-        });
-
-        // Random glitch activation
-        setInterval(() => {
-            const glitchElement = document.querySelector('.glitch');
-            glitchElement.style.animation = 'none';
-            setTimeout(() => {
-                glitchElement.style.animation = '';
-            }, 100);
-        }, 15000);
-    </script>
+      window.addEventListener('scroll', scrollHandler);
+      scrollHandler();
+    });
+  </script>
 </body>
 </html>
